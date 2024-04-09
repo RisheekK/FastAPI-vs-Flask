@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify
 from sqlalchemy import create_engine, Column, Integer, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from marshmallow import Schema, fields
+from marshmallow import Schema, ValidationError, fields, validates
 
 # Flask app initialization
 app = Flask(__name__)
@@ -39,6 +39,22 @@ class ContactSchema(Schema):
     individual_id = fields.Str()
     status = fields.Str()
     contact_id = fields.Str()
+
+    @validates('username')
+    def validate_username_length(self, value):
+        """Ensures username is not null and has a minimum length."""
+        if not value:
+            raise ValidationError("username cannot be null")
+        if len(value) < 3:
+            raise ValidationError("username must be at least 3 characters long")
+        return value
+
+    @validates('phonenumber')
+    def validate_phonenumber_range(self, value):
+        """Validates phone number format (optional, adjust as needed)."""
+        if not isinstance(value, int) or len(str(value)) != 10 or not (1 <= value <= 9999999999):
+            raise ValidationError("phonenumber must be a valid 10-digit integer")
+        return value
 
 class ContactPointEmailSchema(Schema):
     username = fields.Str(required=True)
