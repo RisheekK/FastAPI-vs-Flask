@@ -244,47 +244,17 @@ def post_contact():
     session.commit()
     duration = time.time() - start_time
 
-    return jsonify({'message': message, 'username': content['username'], 'time taken':duration})
+    return jsonify({'message': message, 'username': content['username'], 'time taken':duration}), 201
 
-@app.route('/contacts/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+@app.route('/contacts/<int:id>', methods=['GET'])
 def contact(id):
     # Get contact by id
     contact = session.query(Contact).filter_by(id=id).first()
     if not contact:
         return jsonify({'message': 'Contact not found'}), 404  # Not found
 
-    if request.method == 'GET':
-        # Return contact details
-        return jsonify(ContactSchema().dump(contact))
+    return jsonify(ContactSchema().dump(contact))
 
-    elif request.method == 'PUT':
-        # Update contact
-        content = request.get_json()
-        schema = ContactSchema()
-        # Validate data (excluding id)
-        errors = schema.validate(content, partial=True)
-        if errors:
-            return jsonify(errors), 400  # Bad request
-
-        contact.username = content.get('username', contact.username)
-        contact.phonenumber = content.get('phonenumber', contact.phonenumber)
-        contact.country = content.get('country', contact.country)
-        contact.state = content.get('state', contact.state)
-        contact.email = content.get('email', contact.email)
-        contact.email_opt_in_status = content.get('email_opt_in_status', contact.email_opt_in_status)
-        contact.sms_opt_in_status = content.get('sms_opt_in_status', contact.sms_opt_in_status)
-        contact.matm_owner = content.get('matm_owner', contact.matm_owner)
-        contact.individual_id = content.get('individual_id', contact.individual_id)
-        contact.status = content.get('status', contact.status)
-        contact.contact_id = content.get('contact_id', contact.contact_id)
-        session.commit()
-        return jsonify(schema.dump(contact))
-
-    elif request.method == 'DELETE':
-        # Delete contact
-        session.delete(contact)
-        session.commit()
-        return jsonify({'message': 'Contact deleted successfully'})
     
 @app.route('/email', methods=['GET'])
 def get_email():

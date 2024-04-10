@@ -19,19 +19,19 @@ engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 # Create a declarative base for SQLAlchemy models
 Base = declarative_base()
 
-class APITimingMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
-        start_time = time.time()  # Capture the start time
-        response = await call_next(request)
-        process_time = time.time() - start_time  # Calculate processing time
+# class APITimingMiddleware(BaseHTTPMiddleware):
+#     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+#         start_time = time.time()  # Capture the start time
+#         response = await call_next(request)
+#         process_time = time.time() - start_time  # Calculate processing time
         
-        # Log the time taken to process the request
-        print(f"Request: {request.url.path} took {process_time} seconds")
+#         # Log the time taken to process the request
+#         print(f"Request: {request.url.path} took {process_time} seconds")
         
-        # Optionally, add the timing information to response headers
-        response.headers['X-Process-Time'] = str(process_time)
+#         # Optionally, add the timing information to response headers
+#         response.headers['X-Process-Time'] = str(process_time)
         
-        return response
+#         return response
     
 # Define SQLAlchemy ORM models based on the provided schema
 class Contact(Base):
@@ -159,7 +159,7 @@ async def update_contact(data:Individual, db,individual_id_new = str):
     db.add(new_individual)
     db.commit()
 
-@app.post("/contacts/", response_model=dict, status_code=status.HTTP_201_CREATED)
+@app.post("/contacts", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def create_contact(data: ContactBase,background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
 
     start_time = time.time()
@@ -225,7 +225,7 @@ async def create_contact(data: ContactBase,background_tasks: BackgroundTasks, db
     return ({'message': message, 'username': data.username, 'time taken':duration})
 
 
-@app.get("/contacts/") 
+@app.get("/contacts") 
 async def read_contacts(db: Session = Depends(get_db)):
     results = db.execute(select(Contact))
     users = results.scalars().all()

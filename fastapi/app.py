@@ -222,6 +222,8 @@ async def index(data: ContactBase, db: AsyncSession = Depends(get_db)):
     db.add(contact_ins)
     await db.commit()
 
+    await write_email_task
+
     duration = time.time() - start_time
     return ({'message': message, 'username': data.username, 'time taken':duration})
 
